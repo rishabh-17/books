@@ -1,11 +1,11 @@
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
-module.exports = function(req, res, next) {
-  const token = req.header('auth');
+exports.auth = function (req, res, next) {
+  const token = req.header("auth");
 
   if (!token) {
-    return res.status(401).json({ msg: 'No token, authorization denied' });
+    return res.status(401).json({ msg: "No token, authorization denied" });
   }
 
   try {
@@ -14,6 +14,14 @@ module.exports = function(req, res, next) {
     req.user = decoded.user;
     next();
   } catch (err) {
-    res.status(401).json({ msg: 'Token is not valid' });
+    res.status(401).json({ msg: "Token is not valid" });
+  }
+};
+
+exports.adminAuth = function (req, res, next) {
+  if (req.user.isAdmin) {
+    next();
+  } else {
+    res.status(401).json({ msg: "User is not an admin" });
   }
 };

@@ -1,13 +1,33 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middleware/auth');
-const { bookController } = require('../controllers');
+const multer = require("multer");
+const { auth, adminAuth } = require("../middleware/auth");
+const { bookController } = require("../controllers");
 
-router.get('/', auth, bookController.getBooks);
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "../public");
+  },
+});
 
-router.post('/', auth, bookController.addBooks);
+const uploadPdf = multer({ storage }).single("pdf");
+const uploadThumbnail = multer({ storage }).single("thumbnail");
 
-router.delete('/:id', auth, bookController.deleteBook);
+router.get("/get", auth, bookController.getBooks);
+
+router.post(
+  "/add",
+  auth,
+  adminAuth,
+  uploadPdf,
+  uploadThumbnail,
+  bookController.addBooks
+);
+
+router.delete("/delete/:id", auth, adminAuth, bookController.deleteBook);
+
+router.patch("/edit/:id", auth, adminAuth, bookController.editBook);
+
+router.get("/get/:id", auth, bookController.getBookById);
 
 module.exports = router;
-
